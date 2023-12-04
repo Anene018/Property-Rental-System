@@ -1,27 +1,34 @@
 package com.flexisaf.controllers;
-import com.flexisaf.models.house;
 import com.flexisaf.models.user;
-import com.flexisaf.service.HouseService;
 import com.flexisaf.service.UserService;
 
 
 import java.sql.Date;
 import java.io.IOException;
-import javax.servlet.ServletConfig;
 import  javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.annotation.WebServlet;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Schema;
 @WebServlet("/user/secured/")
 public class UserProtected extends HttpServlet {
     private UserService userService;
     public void init(){
         userService = new UserService();
     }
+
+    @Operation(summary = "Get user by ID", description = "Get user details by user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = user.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @io.swagger.v3.oas.annotations.media.Content) })
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(@Parameter(description = "Action parameter", required = true) HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
         if ("getByUserId".equals(action)){
             getUserByUserId(req,resp);
@@ -32,14 +39,28 @@ public class UserProtected extends HttpServlet {
         }
     }
 
+    @Operation(summary = "Update user", description = "Update user details by user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "text/plain", schema = @Schema(implementation = String.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @io.swagger.v3.oas.annotations.media.Content),
+            @ApiResponse(responseCode = "500", description = "Failed to update user", content = @io.swagger.v3.oas.annotations.media.Content) })
+
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut( @Parameter(description = "Action parameter", required = true) HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
         if ("update".equals(action)){
             updateUser(req,resp);
         }
     }
 
+    @Operation(summary = "Delete user", description = "Delete user by user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "text/plain", schema = @Schema(implementation = String.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @io.swagger.v3.oas.annotations.media.Content),
+            @ApiResponse(responseCode = "500", description = "Failed to delete user", content = @io.swagger.v3.oas.annotations.media.Content)
+    })
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
@@ -94,8 +115,12 @@ public class UserProtected extends HttpServlet {
             resp.getWriter().println("Failed to update User with userId: " + userId);
         }
     }
-
-    private void getUserByUserId(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @Operation(summary = "Get user by user ID", description = "Get user details by user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = user.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @io.swagger.v3.oas.annotations.media.Content) })
+    private void getUserByUserId(@Parameter(description = "Email parameter", required = true) HttpServletRequest req,  HttpServletResponse resp) throws ServletException, IOException {
         int userId = Integer.parseInt(req.getParameter("userId"));
         user fetchedUser = userService.getUserById(userId);
         if (fetchedUser != null){
@@ -104,7 +129,13 @@ public class UserProtected extends HttpServlet {
             resp.getWriter().println("User not found");
         }
     }
-    private void getUserByEmail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+    @Operation(summary = "Get user by email", description = "Get user details by email address")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @Schema(implementation = user.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @io.swagger.v3.oas.annotations.media.Content) })
+    private void getUserByEmail(@Parameter(description = "Email parameter", required = true) HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getParameter("email");
         user fetchedUser = userService.getUserByEmail(email);
         if (fetchedUser != null){
